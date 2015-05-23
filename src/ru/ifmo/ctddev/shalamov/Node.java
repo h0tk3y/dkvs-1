@@ -42,11 +42,6 @@ public class Node implements Runnable, AutoCloseable {
     private LinkedBlockingDeque<Message> incomingMessages = new LinkedBlockingDeque<>();
 
     /**
-     * Local replica (aka statemashine)
-     */
-    private Replica localReplica;
-
-    /**
      * An object for communication between remote Instances through sockets and message queue.
      */
     private class CommunicationEntry {
@@ -58,13 +53,22 @@ public class Node implements Runnable, AutoCloseable {
     /**
      * fixed-size array of existing Nodes.
      */
-    private CommunicationEntry[] neighbors;
+    private CommunicationEntry[] nodes;
 
     /**
      * map for clients
      */
     private SortedMap<Integer, CommunicationEntry> clients = new TreeMap<>();
 
+    /**
+     * Each node has a Replica, Leader and Acceptor instances.
+     */
+    private Replica localReplica;
+    private Acceptor localAcceptor;
+    private Leader localLeader;
+
+
+//------------------METHODS----------------------------------------------------
 
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -83,10 +87,10 @@ public class Node implements Runnable, AutoCloseable {
                 globalConfig = Config.readDkvsProperties();
             inSocket = new ServerSocket(globalConfig.port(id));
             diskPersistence = new FileWriter(persistenceFileName, true);
-            neighbors = new CommunicationEntry[globalConfig.nodesCount()];
-            localReplica = new Replica(id, globalConfig.ids());
+            nodes = new CommunicationEntry[globalConfig.nodesCount()];
+            localReplica = new Replica(id, this, globalConfig.ids());
             for (int i = 0; i < globalConfig.nodesCount(); ++i) {
-                neighbors[i] = new CommunicationEntry();
+                nodes[i] = new CommunicationEntry();
             }
         } catch (IOException e) {
             log.info(e.getMessage());
@@ -154,17 +158,17 @@ public class Node implements Runnable, AutoCloseable {
                     // (re)connection
                     int nodeId = Integer.parseInt(parts[1]);
                     try {
-                        neighbors[nodeId].input.close();
+                        nodes[nodeId].input.close();
                     } catch (IOException e) {
                     }
-                    neighbors[nodeId].input = client;
+                    nodes[nodeId].input = client;
                     log.info(String.format("#%d: Started listening to node.%d from %s", id, nodeId, client.getInetAddress()));
                     listenToNode(bufferedReader, nodeId);
                     break;
                 case "get":
                 case "set":
                 case "delete":
-                    final int newClientId = (clients.keySet().size() == 0)? 1 :
+                    final int newClientId = (clients.keySet().size() == 0) ? 1 :
                             (clients.keySet().stream().max(Comparator.<Integer>naturalOrder()).get()) + 1;
 
                     CommunicationEntry entry = new CommunicationEntry();
@@ -173,7 +177,7 @@ public class Node implements Runnable, AutoCloseable {
 
                     // We've already read a message from stream. Have to handle it:
                     Message firstMessage = Message.parse(newClientId, parts);
-                    while(!stopping) {
+                    while (!stopping) {
                         try {
                             incomingMessages.put(firstMessage);
                             break;
@@ -207,15 +211,16 @@ public class Node implements Runnable, AutoCloseable {
     private void handleMessages() {
         while (true) {
             Message m = incomingMessages.poll();
+            log.info(String.format("Handling message: %s", m));
 
-            //processMessage(m);  // overloadedMethod.
 
             if (m instanceof ReplicaMessage) {
-                Message responce = localReplica.receiveMessage((ReplicaMessage) m);
-                sendToClient(m.getSource(), responce);
+                localReplica.receiveMessage((ReplicaMessage) m);
             }
-
-            // TODO обработка сообщений паксоса.
+            if (m instanceof LeaderMessage) {
+            }
+            if (m instanceof AcceptorMessage) {
+            }
 
             if (m instanceof PingMessage) {
                 sendToNode(m.getSource(), new PongMessage(id));
@@ -227,11 +232,13 @@ public class Node implements Runnable, AutoCloseable {
     public void close() throws Exception {
         stopping = true;
         inSocket.close();
-        for (CommunicationEntry n : neighbors) {
+        for (CommunicationEntry n : nodes) {
             if (n.input != null) n.input.close();
             if (n.output != null) n.output.close();
         }
     }
+
+//---------------------SPEAK-&-LISTEN------------------------------------------
 
     /**
      * A Communication method, it puts all the messages received from
@@ -275,7 +282,6 @@ public class Node implements Runnable, AutoCloseable {
 //        }
     }
 
-
     /**
      * Creates an output socket to the specified node.
      * sends messages from corresponding queue through network to destination using socket.
@@ -284,7 +290,7 @@ public class Node implements Runnable, AutoCloseable {
      */
     private void speakToNode(int nodeId) {
         Socket clientSocket = new Socket();
-        neighbors[nodeId].output = clientSocket;
+        nodes[nodeId].output = clientSocket;
 
         String address = globalConfig.address(nodeId);
         int port = globalConfig.port(nodeId);
@@ -304,7 +310,7 @@ public class Node implements Runnable, AutoCloseable {
                 while (!stopping) {
                     Message m = null;
                     try {
-                        m = neighbors[nodeId].messages.takeFirst();
+                        m = nodes[nodeId].messages.takeFirst();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -322,7 +328,7 @@ public class Node implements Runnable, AutoCloseable {
                         writer.write(m + "\n");
                     } catch (IOException ioe) {
                         log.info(String.format("#%d: Couldn't send a message. Retrying.", id));
-                        neighbors[nodeId].messages.addFirst(m);
+                        nodes[nodeId].messages.addFirst(m);
                     }
                 }
             } catch (SocketException e) {
@@ -358,7 +364,7 @@ public class Node implements Runnable, AutoCloseable {
                     writer.flush();
                 } catch (IOException ioe) {
                     log.info("Couldn't send a message. Retrying.");
-                    neighbors[clientId].messages.addFirst(m);
+                    nodes[clientId].messages.addFirst(m);
                 }
             }
         } catch (IOException e) {
@@ -366,17 +372,26 @@ public class Node implements Runnable, AutoCloseable {
         //TODO: suppose, after sending message back, resources can be freed.
     }
 
-
     /**
      * Adds given message to the appropriate Nodes's queue.
      *
      * @param to
      * @param message
      */
-    private void sendToNode(int to, Message message) {
-        neighbors[to].messages.addLast(message);
+    public void sendToNode(int to, Message message) {
+        while (!stopping) {
+            try {
+                if (to == id)
+                    incomingMessages.put(message);
+                else
+                    nodes[to].messages.put(message);
+                break;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
     }
-
 
     /**
      * Adds given message to the appropriate Client's queue.
@@ -384,8 +399,16 @@ public class Node implements Runnable, AutoCloseable {
      * @param to
      * @param message
      */
-    private void sendToClient(int to, Message message) {
-        clients.get(to).messages.addLast(message);
+    public void sendToClient(int to, Message message) {
+        while (!stopping) {
+            try {
+                clients.get(to).messages.putLast(message);
+                break;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
     }
 }
 

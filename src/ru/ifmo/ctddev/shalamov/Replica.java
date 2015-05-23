@@ -17,13 +17,19 @@ public class Replica {
     List<Integer> leaderIds;
     private HashMap<String, String> map;
 
+    /**
+     * link to "local machine", where replica is running.
+     */
+    private Node machine;
+
     //public void send(int id, Message m);
 
     public volatile int slotIn = 0;
     public volatile int slotOut = 0;
 
-    public Replica(int id, List<Integer> leaderIds) {
+    public Replica(int id, Node machine, List<Integer> leaderIds) {
         this.id = id;
+        this.machine = machine;
         this.leaderIds = leaderIds;
         map = new HashMap<>();
     }
@@ -34,7 +40,7 @@ public class Replica {
      *
      * @param message Message that should be handled by the replica.
      */
-    public Message receiveMessage(ReplicaMessage message) {
+    public void receiveMessage(ReplicaMessage message) {
         if(message instanceof GetRequest)
         {
             String key = ((GetRequest)message).key;
@@ -42,9 +48,9 @@ public class Replica {
             if(value == null)
                 value = "none";
 
-            return new DataMessage(message.getSource(), value);
+            machine.sendToClient(message.getSource(), new DataMessage(message.getSource(), value));
         }
         //TODO paxos required.
-        return null;
+        throw new IllegalArgumentException("now implemented yet");
     }
 }
