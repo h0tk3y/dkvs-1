@@ -1,10 +1,12 @@
 package ru.ifmo.ctddev.shalamov;
 
+import ru.ifmo.ctddev.shalamov.messages.DataMessage;
 import ru.ifmo.ctddev.shalamov.messages.GetRequest;
 import ru.ifmo.ctddev.shalamov.messages.Message;
 import ru.ifmo.ctddev.shalamov.messages.ReplicaMessage;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -23,6 +25,7 @@ public class Replica {
     public Replica(int id, List<Integer> leaderIds) {
         this.id = id;
         this.leaderIds = leaderIds;
+        map = new HashMap<>();
     }
 
     /**
@@ -31,13 +34,17 @@ public class Replica {
      *
      * @param message Message that should be handled by the replica.
      */
-    public void receiveMessage(ReplicaMessage message) {
+    public Message receiveMessage(ReplicaMessage message) {
         if(message instanceof GetRequest)
         {
-            String value = map.get(((GetRequest)message).key);
+            String key = ((GetRequest)message).key;
+            String value = map.get(key);
             if(value == null)
                 value = "none";
-            // TODO: replica should send the message BACK;
+
+            return new DataMessage(message.getSource(), value);
         }
+        //TODO paxos required.
+        return null;
     }
 }

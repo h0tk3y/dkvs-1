@@ -6,9 +6,8 @@ package ru.ifmo.ctddev.shalamov.messages;
  * Created by viacheslav on 20.05.2015.
  */
 public abstract class ReplicaMessage extends Message {
-    int fromId;
 
-    ReplicaMessage(int fromId) {
-        this.fromId = fromId;
-    }
+//    public ReplicaMessage(int fromId, String text) {
+//        super(fromId, text);
+//    }
 }

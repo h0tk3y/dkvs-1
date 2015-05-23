@@ -9,8 +9,7 @@ public class SetRequest extends ClientRequest {
     String value;
 
     public SetRequest(int fromId, String key, String value) {
-        super(fromId);
-        //this.fromId = fromId;
+        this.fromId = fromId;
         this.key = key;
         this.value = value;
     }

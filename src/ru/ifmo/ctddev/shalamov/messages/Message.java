@@ -10,6 +10,18 @@ import com.google.common.base.Joiner;
  * Created by viacheslav on 20.05.2015.
  */
 public abstract class Message {
+    protected String text;
+    protected int fromId;
+
+    public int getSource() {
+        return fromId;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+
 
     /**
      * dispatches the message text and creates appropriate Message-subclass.
@@ -17,21 +29,22 @@ public abstract class Message {
      * @param parts
      * @return
      */
-    public static Message parse(String[] parts) {
+    public static Message parse(int fromId, String[] parts) {
+        //System.out.println(Joiner.on(" ").join(parts));
         switch (parts[0]) {
             case "node":
-                return new NodeMessage(Integer.parseInt(parts[1]));
+                return new NodeMessage(fromId); // Integer.parseInt(parts[1]) - fromId is the same ans it.
             case "ping":
-                return new PingMessage();
+                return new PingMessage(fromId);
             case "pong":
-                return new PongMessage();
+                return new PongMessage(fromId);
             case "get":
-                return new GetRequest(Integer.parseInt(parts[1]), parts[2]);
+                return new GetRequest(fromId, parts[1]);
             case "set":
-                return new SetRequest(Integer.parseInt(parts[1]), parts[2],
-                        Joiner.on(" ").join(Arrays.copyOfRange(parts, 3, parts.length)));
+                return new SetRequest(fromId, parts[1], parts[2]);
+                        //Joiner.on(" ").join(Arrays.copyOfRange(parts, 2, parts.length)));
             case "delete":
-                return new DeleteRequest(Integer.parseInt(parts[1]), parts[2]);
+                return new DeleteRequest(fromId, parts[1]);
             default:
                 throw new IllegalArgumentException("Unknown message.");
         }

@@ -7,9 +7,9 @@ public class DeleteRequest extends ClientRequest {
     //int fromId;
     String key;
 
+
     public DeleteRequest(int fromId, String key) {
-        super(fromId);
-        //this.fromId = fromId;
+        this.fromId = fromId;
         this.key = key;
     }
 
