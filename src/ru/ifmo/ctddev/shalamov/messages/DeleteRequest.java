@@ -5,7 +5,7 @@ package ru.ifmo.ctddev.shalamov.messages;
  */
 public class DeleteRequest extends ClientRequest {
     //int fromId;
-    String key;
+    public String key;
 
 
     public DeleteRequest(int fromId, String key) {

@@ -5,8 +5,8 @@ package ru.ifmo.ctddev.shalamov.messages;
  */
 public class SetRequest extends ClientRequest {
     //int fromId;
-    String key;
-    String value;
+    public String key;
+    public String value;
 
     public SetRequest(int fromId, String key, String value) {
         this.fromId = fromId;

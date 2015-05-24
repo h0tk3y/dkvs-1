@@ -7,7 +7,7 @@ public class ProposeMessage extends LeaderMessage {
     public int slot;
     public ClientRequest request;
 
-    ProposeMessage(int fromId, int slot, ClientRequest request) {
+    public ProposeMessage(int fromId, int slot, ClientRequest request) {
         super(fromId);
         this.slot = slot;
         this.request = request;

@@ -66,7 +66,7 @@ public class Node implements Runnable, AutoCloseable {
     private Acceptor localAcceptor;
     private Leader localLeader;
 
-    private Persistance localPersistance;
+    private Persistence localPersistence;
 
 
 //------------------METHODS----------------------------------------------------
@@ -82,7 +82,7 @@ public class Node implements Runnable, AutoCloseable {
 
     public Node(int id) {
         this.id = id;
-        localPersistance = new Persistance(id);
+        localPersistence = new Persistence(id);
 
         // todo: try to restore from disc first of all;
         try {

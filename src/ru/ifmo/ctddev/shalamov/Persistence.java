@@ -7,7 +7,7 @@ import java.util.HashMap;
 /**
  * Created by viacheslav on 24.05.2015.
  */
-public class Persistance {
+public class Persistence {
     int nodeId;
 
     public String fileName;
@@ -24,7 +24,7 @@ public class Persistance {
 
     public volatile int lastSlotOut = 0;
 
-    public Persistance(int nodeId) {
+    public Persistence(int nodeId) {
         this.nodeId = nodeId;
         fileName = String.format("dkvs_%d.log", nodeId);
         try {
