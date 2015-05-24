@@ -26,11 +26,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Node.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Node.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1717" max-vertical-offset="4290">
-              <caret line="217" column="36" selection-start-line="217" selection-start-column="36" selection-end-line="217" selection-end-column="36" />
+            <state vertical-scroll-proportion="0.2951192" vertical-offset="0" max-vertical-offset="4316">
+              <caret line="25" column="37" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
               <folding>
                 <element signature="docComment;class#Node#0" expanded="false" />
                 <element signature="docComment;field#incomingMessages#0;class#Node#0" expanded="false" />
@@ -39,7 +39,6 @@
                 <element signature="docComment;field#nodes#0;class#Node#0" expanded="false" />
                 <element signature="docComment;field#clients#0;class#Node#0" expanded="false" />
                 <element signature="method#main#0;class#Node#0" expanded="false" />
-                <element signature="method#saveToDisk#0;class#Node#0" expanded="false" />
                 <element signature="method#run#0;class#Node#0" expanded="false" />
                 <element signature="docComment;method#handleRequest#0;class#Node#0" expanded="false" />
                 <element signature="method#handleRequest#0;class#Node#0" expanded="false" />
@@ -49,7 +48,7 @@
                 <element signature="method#listenToNode#0;class#Node#0" expanded="false" />
                 <element signature="docComment;method#listenToClient#0;class#Node#0" expanded="false" />
                 <element signature="method#listenToClient#0;class#Node#0" expanded="false" />
-                <element signature="e#8894#8931#0" expanded="false" />
+                <element signature="e#8635#8672#0" expanded="false" />
                 <element signature="docComment;method#speakToNode#0;class#Node#0" expanded="false" />
                 <element signature="method#speakToNode#0;class#Node#0" expanded="false" />
                 <element signature="docComment;method#speakToClient#0;class#Node#0" expanded="false" />
@@ -60,106 +59,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProposalValue.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/ProposalValue.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="68" max-vertical-offset="962">
-              <caret line="17" column="4" selection-start-line="17" selection-start-column="4" selection-end-line="17" selection-end-column="4" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Leader.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Leader.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.46878546" vertical-offset="4059" max-vertical-offset="4940">
-              <caret line="172" column="0" selection-start-line="172" selection-start-column="0" selection-end-line="172" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DecisionMessage.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/DecisionMessage.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="702">
-              <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-              <folding>
-                <element signature="e#388#389#0" expanded="true" />
-                <element signature="e#457#458#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Ballot.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Ballot.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1014">
-              <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PhaseTwoRequest.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseTwoRequest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="650">
-              <caret line="11" column="11" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PhaseOneRequest.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseOneRequest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="598">
-              <caret line="14" column="61" selection-start-line="14" selection-start-column="61" selection-end-line="14" selection-end-column="61" />
-              <folding>
-                <element signature="e#243#244#0" expanded="true" />
-                <element signature="e#283#284#0" expanded="true" />
-                <element signature="e#329#330#0" expanded="true" />
-                <element signature="e#397#398#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ReplicaMessage.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/ReplicaMessage.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="494">
-              <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="11" selection-end-column="7" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Replica.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Replica.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1586">
-              <caret line="14" column="40" selection-start-line="14" selection-start-column="40" selection-end-line="14" selection-end-column="40" />
+              <caret line="28" column="35" selection-start-line="28" selection-start-column="35" selection-end-line="28" selection-end-column="35" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PhaseOneResponse.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseOneResponse.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="19" max-vertical-offset="1456">
-              <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -197,11 +102,12 @@
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseTwoResponse.java" />
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseOneRequest.java" />
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseTwoRequest.java" />
-        <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java" />
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/PhaseOneResponse.java" />
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/DecisionMessage.java" />
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Replica.java" />
         <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Leader.java" />
+        <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Persistance.java" />
+        <option value="$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java" />
       </list>
     </option>
   </component>
@@ -680,12 +586,12 @@
       <option name="number" value="Default" />
       <updated>1432066364794</updated>
       <workItem from="1432066370862" duration="51689000" />
-      <workItem from="1432384307527" duration="29090000" />
+      <workItem from="1432384307527" duration="31094000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="80779000" />
+    <option name="totallyTimeSpent" value="82783000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="84" y="-11" width="1847" height="1102" extended-state="6" />
@@ -770,13 +676,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java</url>
-          <line>178</line>
+          <line>168</line>
           <properties />
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java</url>
-          <line>267</line>
+          <line>258</line>
           <properties />
           <option name="timeStamp" value="12" />
         </line-breakpoint>
@@ -814,7 +720,6 @@
             <element signature="docComment;field#nodes#0;class#Node#0" expanded="false" />
             <element signature="docComment;field#clients#0;class#Node#0" expanded="false" />
             <element signature="method#main#0;class#Node#0" expanded="false" />
-            <element signature="method#saveToDisk#0;class#Node#0" expanded="false" />
             <element signature="method#run#0;class#Node#0" expanded="false" />
             <element signature="docComment;method#handleRequest#0;class#Node#0" expanded="false" />
             <element signature="method#handleRequest#0;class#Node#0" expanded="false" />
@@ -824,7 +729,7 @@
             <element signature="method#listenToNode#0;class#Node#0" expanded="false" />
             <element signature="docComment;method#listenToClient#0;class#Node#0" expanded="false" />
             <element signature="method#listenToClient#0;class#Node#0" expanded="false" />
-            <element signature="e#8894#8931#0" expanded="false" />
+            <element signature="e#8635#8672#0" expanded="false" />
             <element signature="docComment;method#speakToNode#0;class#Node#0" expanded="false" />
             <element signature="method#speakToNode#0;class#Node#0" expanded="false" />
             <element signature="docComment;method#speakToClient#0;class#Node#0" expanded="false" />
@@ -1183,38 +1088,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1717" max-vertical-offset="4290">
-          <caret line="217" column="36" selection-start-line="217" selection-start-column="36" selection-end-line="217" selection-end-column="36" />
-          <folding>
-            <element signature="docComment;class#Node#0" expanded="false" />
-            <element signature="docComment;field#incomingMessages#0;class#Node#0" expanded="false" />
-            <element signature="docComment;class#CommunicationEntry#0;class#Node#0" expanded="false" />
-            <element signature="class#CommunicationEntry#0;class#Node#0" expanded="false" />
-            <element signature="docComment;field#nodes#0;class#Node#0" expanded="false" />
-            <element signature="docComment;field#clients#0;class#Node#0" expanded="false" />
-            <element signature="method#main#0;class#Node#0" expanded="false" />
-            <element signature="method#saveToDisk#0;class#Node#0" expanded="false" />
-            <element signature="method#run#0;class#Node#0" expanded="false" />
-            <element signature="docComment;method#handleRequest#0;class#Node#0" expanded="false" />
-            <element signature="method#handleRequest#0;class#Node#0" expanded="false" />
-            <element signature="docComment;method#handleMessages#0;class#Node#0" expanded="false" />
-            <element signature="method#close#0;class#Node#0" expanded="false" />
-            <element signature="docComment;method#listenToNode#0;class#Node#0" expanded="false" />
-            <element signature="method#listenToNode#0;class#Node#0" expanded="false" />
-            <element signature="docComment;method#listenToClient#0;class#Node#0" expanded="false" />
-            <element signature="method#listenToClient#0;class#Node#0" expanded="false" />
-            <element signature="e#8894#8931#0" expanded="false" />
-            <element signature="docComment;method#speakToNode#0;class#Node#0" expanded="false" />
-            <element signature="method#speakToNode#0;class#Node#0" expanded="false" />
-            <element signature="docComment;method#speakToClient#0;class#Node#0" expanded="false" />
-            <element signature="method#sendToNode#0;class#Node#0" expanded="false" />
-            <element signature="docComment;method#sendToClient#0;class#Node#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/messages/DecisionMessage.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="702">
@@ -1226,20 +1099,63 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Leader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4940">
+          <caret line="10" column="11" selection-start-line="10" selection-start-column="11" selection-end-line="10" selection-end-column="11" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Persistance.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.79341656" vertical-offset="835" max-vertical-offset="1716">
+          <caret line="59" column="1" selection-start-line="59" selection-start-column="1" selection-end-line="59" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1353#1354#0" expanded="true" />
+            <element signature="e#1380#1381#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Replica.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1586">
-          <caret line="14" column="40" selection-start-line="14" selection-start-column="40" selection-end-line="14" selection-end-column="40" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="234" max-vertical-offset="1586">
+          <caret line="28" column="35" selection-start-line="28" selection-start-column="35" selection-end-line="28" selection-end-column="35" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Leader.java">
+    <entry file="file://$PROJECT_DIR$/src/ru/ifmo/ctddev/shalamov/Node.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.46878546" vertical-offset="4059" max-vertical-offset="4940">
-          <caret line="172" column="0" selection-start-line="172" selection-start-column="0" selection-end-line="172" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.2951192" vertical-offset="0" max-vertical-offset="4316">
+          <caret line="25" column="37" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="docComment;class#Node#0" expanded="false" />
+            <element signature="docComment;field#incomingMessages#0;class#Node#0" expanded="false" />
+            <element signature="docComment;class#CommunicationEntry#0;class#Node#0" expanded="false" />
+            <element signature="class#CommunicationEntry#0;class#Node#0" expanded="false" />
+            <element signature="docComment;field#nodes#0;class#Node#0" expanded="false" />
+            <element signature="docComment;field#clients#0;class#Node#0" expanded="false" />
+            <element signature="method#main#0;class#Node#0" expanded="false" />
+            <element signature="method#run#0;class#Node#0" expanded="false" />
+            <element signature="docComment;method#handleRequest#0;class#Node#0" expanded="false" />
+            <element signature="method#handleRequest#0;class#Node#0" expanded="false" />
+            <element signature="docComment;method#handleMessages#0;class#Node#0" expanded="false" />
+            <element signature="method#close#0;class#Node#0" expanded="false" />
+            <element signature="docComment;method#listenToNode#0;class#Node#0" expanded="false" />
+            <element signature="method#listenToNode#0;class#Node#0" expanded="false" />
+            <element signature="docComment;method#listenToClient#0;class#Node#0" expanded="false" />
+            <element signature="method#listenToClient#0;class#Node#0" expanded="false" />
+            <element signature="e#8635#8672#0" expanded="false" />
+            <element signature="docComment;method#speakToNode#0;class#Node#0" expanded="false" />
+            <element signature="method#speakToNode#0;class#Node#0" expanded="false" />
+            <element signature="docComment;method#speakToClient#0;class#Node#0" expanded="false" />
+            <element signature="method#sendToNode#0;class#Node#0" expanded="false" />
+            <element signature="docComment;method#sendToClient#0;class#Node#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -22,9 +22,8 @@ import ru.ifmo.ctddev.shalamov.messages.Message;
  */
 public class Node implements Runnable, AutoCloseable {
     private int id;
-    private String persistenceFileName;
 
-    private FileWriter diskPersistence;
+    //todo: implement a better logger
     public Logger log = Logger.getLogger("node." + id);
 
     private ServerSocket inSocket = null;
@@ -67,6 +66,8 @@ public class Node implements Runnable, AutoCloseable {
     private Acceptor localAcceptor;
     private Leader localLeader;
 
+    private Persistance localPersistance;
+
 
 //------------------METHODS----------------------------------------------------
 
@@ -81,12 +82,13 @@ public class Node implements Runnable, AutoCloseable {
 
     public Node(int id) {
         this.id = id;
-        persistenceFileName = String.format("dkvs_%d.log", id);
+        localPersistance = new Persistance(id);
+
+        // todo: try to restore from disc first of all;
         try {
             if (globalConfig == null)
                 globalConfig = Config.readDkvsProperties();
             inSocket = new ServerSocket(globalConfig.port(id));
-            diskPersistence = new FileWriter(persistenceFileName, true);
             nodes = new CommunicationEntry[globalConfig.nodesCount()];
             localReplica = new Replica(id, this, globalConfig.ids());
             for (int i = 0; i < globalConfig.nodesCount(); ++i) {
@@ -94,18 +96,6 @@ public class Node implements Runnable, AutoCloseable {
             }
         } catch (IOException e) {
             log.info(e.getMessage());
-        }
-    }
-
-    private void saveToDisk(Object data) {
-        synchronized (diskPersistence) {
-            try {
-                diskPersistence.append(data.toString());
-                diskPersistence.append('\n');
-                diskPersistence.flush();
-            } catch (IOException e) {
-                log.info(e.getMessage());
-            }
         }
     }
 
@@ -213,13 +203,14 @@ public class Node implements Runnable, AutoCloseable {
             Message m = incomingMessages.poll();
             log.info(String.format("Handling message: %s", m));
 
-
             if (m instanceof ReplicaMessage) {
                 localReplica.receiveMessage((ReplicaMessage) m);
             }
             if (m instanceof LeaderMessage) {
+                localLeader.receiveMessage((LeaderMessage) m);
             }
             if (m instanceof AcceptorMessage) {
+                localAcceptor.receiveMessage((AcceptorMessage) m);
             }
 
             if (m instanceof PingMessage) {
