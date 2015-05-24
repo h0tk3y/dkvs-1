@@ -31,7 +31,7 @@ public class Acceptor {
     public Acceptor(int id, Node machine) {
         this.id = id;
         this.machine = machine;
-        this.ballotNumber = new Ballot(1, 1);
+        this.ballotNumber = new Ballot(-1, 0);
         //    Ballot(1,globalConfig.ids.first()
         this.accepted = new HashMap<>();
     }
@@ -42,12 +42,14 @@ public class Acceptor {
                 ballotNumber = message.ballotNum;
             machine.sendToNode(message.getSource(),
                     new PhaseOneResponse(id, message.ballotNum, ballotNumber, accepted.values()));
+            return;
         }
         if (message instanceof PhaseTwoRequest) {
             if (message.ballotNum == ballotNumber)
                 accepted.put(((PhaseTwoRequest) message).payload.slot, ((PhaseTwoRequest) message).payload);
             machine.sendToNode(message.getSource(),
                     new PhaseTwoResponse(id, ballotNumber, ((PhaseTwoRequest) message).payload));
+            return;
         }
         throw new IllegalStateException("Incorrect message");
     }

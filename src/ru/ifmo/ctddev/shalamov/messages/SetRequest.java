@@ -16,6 +16,6 @@ public class SetRequest extends ClientRequest {
 
     @Override
     public String toString() {
-        return System.out.format("set %d %s %s", fromId, key, value).toString();
+        return String.format("[set %d, %s, %s]", fromId, key, value);
     }
 }

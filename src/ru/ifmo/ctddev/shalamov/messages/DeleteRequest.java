@@ -15,6 +15,6 @@ public class DeleteRequest extends ClientRequest {
 
     @Override
     public String toString() {
-        return System.out.format("delete %d %s", fromId, key).toString();
+        return String.format("[delete %d, %s]", fromId, key);
     }
 }

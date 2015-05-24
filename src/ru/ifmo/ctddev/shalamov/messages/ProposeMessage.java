@@ -15,6 +15,6 @@ public class ProposeMessage extends LeaderMessage {
 
     @Override
     public String toString() {
-        return String.format("propose %d %d %s", fromId, slot, request);
+        return String.format("<propose %d, %d, %s>", fromId, slot, request);
     }
 }

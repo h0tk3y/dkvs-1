@@ -23,7 +23,7 @@ public class ProposalValue {
 
     @Override
     public String toString() {
-        return String.format("<%d %d %d>", ballotNum, slot, command);
+        return String.format("<%s %d %s>", ballotNum, slot, command);
     }
 
     public static ProposalValue parse(String[] parts) {

@@ -1,13 +1,8 @@
 package ru.ifmo.ctddev.shalamov;
 
-import java.io.File;
-
 public class Main {
 
     public static void main(String[] args) {
-        String test = String.format("abacabs %d", 5).toString();
-//        new Thread(new Node(0)).start();
-
         for (int i = 0; i < 3; ++i) {
             new Thread(new Node(i)).start();
         }

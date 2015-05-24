@@ -9,6 +9,8 @@ import java.util.*;
  */
 public class Leader {
     int id;
+
+    int last_ballot_num;
     Node machine;
     List<Integer> replicaIds;
     List<Integer> acceptorIds;
@@ -38,11 +40,16 @@ public class Leader {
         this.acceptorIds = acceptorIds;
         this.replicaIds = replicaIds;
         proposals = new HashMap<>();
-        currentBallot = new Ballot(1, id);
-        active = (id == 1);
+        currentBallot = new Ballot(0, id);
+        last_ballot_num = 0;
+        active = (id == 0);
 
         commanders = new HashMap<>();
         scouts = new HashMap<>();
+    }
+
+    public void startLeader() {
+        startScouting(currentBallot);
     }
 
     public void receiveMessage(LeaderMessage message) {
@@ -79,7 +86,7 @@ public class Leader {
         machine.log.info(String.format("PREEMPTED: there's ballot %s", b));
         if (b.compareTo(currentBallot) > 0) {
             active = false;
-//            currentBallot = new Ballot(nextBallotNum(), id);
+            currentBallot = new Ballot(++last_ballot_num, id);
             machine.log.info(String.format("WAITING for %d to fail", b.leaderId));
         }
     }
@@ -126,7 +133,7 @@ public class Leader {
                 response.pvalues.forEach(r ->
                         {
                             if (!proposals.containsKey(r.slot) ||
-                                    r.ballotNum.compareTo(proposals.get(r.slot).ballotNum) > 0) ;
+                                    r.ballotNum.compareTo(proposals.get(r.slot).ballotNum) > 0)
                             proposals.put(r.slot, r);
                         }
                 );

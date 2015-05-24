@@ -6,9 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Comparator;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
@@ -18,6 +16,9 @@ import ru.ifmo.ctddev.shalamov.messages.Message;
 
 
 /**
+ * Represents an instance of Server (a machine in the system).
+ * Should have unique identifier.
+ * <p>
  * Created by viacheslav on 19.05.2015.
  */
 public class Node implements Runnable, AutoCloseable {
@@ -90,7 +91,9 @@ public class Node implements Runnable, AutoCloseable {
                 globalConfig = Config.readDkvsProperties();
             inSocket = new ServerSocket(globalConfig.port(id));
             nodes = new CommunicationEntry[globalConfig.nodesCount()];
-            localReplica = new Replica(id, this, globalConfig.ids());
+            localReplica = new Replica(id, this, Arrays.asList(0)); // todo: only one leader.!!!!
+            localLeader = new Leader(id,this,globalConfig.ids(), globalConfig.ids());
+            localAcceptor = new Acceptor(id, this);
             for (int i = 0; i < globalConfig.nodesCount(); ++i) {
                 nodes[i] = new CommunicationEntry();
             }
@@ -131,6 +134,9 @@ public class Node implements Runnable, AutoCloseable {
                 } catch (IOException e) {
                 }
         }).start();
+
+        // todo: what is no requests exist??
+        localLeader.startLeader();
     }
 
     /**
@@ -173,7 +179,6 @@ public class Node implements Runnable, AutoCloseable {
                             break;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                            continue;
                         }
                     }
 
@@ -183,7 +188,7 @@ public class Node implements Runnable, AutoCloseable {
                     }).start();
 
                     log.info(String.format("#%d: Client %d connected.", id, newClientId));
-                    //listenToClient(bufferedReader, newClientId);
+                    listenToClient(bufferedReader, newClientId);
                     break;
                 default:
                     break;
@@ -191,7 +196,6 @@ public class Node implements Runnable, AutoCloseable {
 
         } catch (IOException e) {
             log.info(e.getMessage());
-            return;
         }
     }
 
@@ -200,13 +204,21 @@ public class Node implements Runnable, AutoCloseable {
      */
     private void handleMessages() {
         while (true) {
-            Message m = incomingMessages.poll();
+            Message m = null;
+            try {
+                m = incomingMessages.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(m == null)
+                continue;
             log.info(String.format("Handling message: %s", m));
 
             if (m instanceof ReplicaMessage) {
                 localReplica.receiveMessage((ReplicaMessage) m);
             }
             if (m instanceof LeaderMessage) {
+                //localLeader.startLeader();
                 localLeader.receiveMessage((LeaderMessage) m);
             }
             if (m instanceof AcceptorMessage) {
@@ -239,12 +251,14 @@ public class Node implements Runnable, AutoCloseable {
      * @param nodeId  id of node, which is on the other end of this socket.
      */
     private void listenToNode(BufferedReader breader, int nodeId) {
-        try {
-            String data = breader.readLine();
-            Message m = Message.parse(nodeId, data.split(""));
-            incomingMessages.offer(m);
-        } catch (IOException e) {
-            log.info(e.getMessage());
+        while (!stopping) {
+            try {
+                String data = breader.readLine();
+                Message m = Message.parse(nodeId, data.split(""));
+                incomingMessages.offer(m);
+            } catch (IOException e) {
+                log.info(e.getMessage());
+            }
         }
     }
 
@@ -257,20 +271,18 @@ public class Node implements Runnable, AutoCloseable {
      */
     private void listenToClient(BufferedReader reader, Integer clientId) {
         log.info(String.format("#%d: Client %d connected.", id, clientId));
-
-//        dispatch(reader) { parts ->
-//                val message = ClientRequest.parse(clientId, parts)
-//            receiveClientRequest(message)
-//        }
-//        try {
-//            String text = reader.readLine();
-//            log.info(String.format("#%d: Clien pushed text: %s ", id, text));
-//            Message message = ClientRequest.parse(clientId, text.split(" "));
-//            log.info(String.format("#%d: Message from %d: %s", id, clientId, text));
-//            incomingMessages.offer(localReplica.receiveMessage((ReplicaMessage) message));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        while (!stopping) {
+            try {
+                String[] parts = reader.readLine().split(" ");
+                ClientRequest message = ClientRequest.parse(clientId, parts);
+                if (message != null) {
+                    log.info(String.format("receiver message %s from client %d", message, message.getSource()));
+                    incomingMessages.add(message);
+                }
+            } catch (IOException e) {
+                log.info(String.format("Lost connection to Client %d: %s", clientId, e.getMessage()));
+            }
+        }
     }
 
     /**

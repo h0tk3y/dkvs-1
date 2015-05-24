@@ -25,7 +25,7 @@ public class PhaseOneResponse extends LeaderMessage {
 
     @Override
     public String toString() {
-        return String.format("p1b %d %s %s %s", fromId, originalBallot, ballotNum,
+        return String.format("<p1b %d, %s, %s, %s>", fromId, originalBallot, ballotNum,
                 Joiner.on("_#_").join(pvalues));
     }
 

@@ -9,7 +9,14 @@ import java.util.*;
  */
 public class Replica {
     int id;
+
+    /**
+     *  The set of leaders in the current conﬁguration. The leaders of the
+     *  initial conﬁguration are passed as an argument to the replica.
+     */
     List<Integer> leaderIds;
+
+    // todo
     private Persistence persistence;
 
     /**
@@ -18,15 +25,45 @@ public class Replica {
     private Node machine;
 
 
+    /**
+     *  The index of the next slot in which the replica has not yet proposed any command.
+     */
     public volatile int slotIn = 0;
+
+    /**
+     *  The index of the next slot for which it needs to learn a decision
+     *  before it can update its copy of the application state, equivalent
+     *  to the state’s version number (i.e., number of updates).
+     */
     public volatile int slotOut = 0;
 
-    private HashMap<String, String> data = new HashMap<>();
+    /**
+     *  The replica’s copy of the application state, which we will treat as opaque.
+     *  All replicas start with the same initial application state.
+     */
+    private HashMap<String, String> state = new HashMap<>();
 
-    private HashMap<ClientRequest, Integer> awaitingClients = new HashMap<>();
-    private SortedSet<ClientRequest> requests = new TreeSet<>();
+    /**
+     *  An initially empty set of requests that the replica has received and are not yet proposed or decided.
+     */
+    private HashSet<ClientRequest> requests = new HashSet<>();
+
+    /**
+     *  An initially empty set of proposals that are currently outstanding.
+     */
     private HashMap<Integer, ClientRequest> proposals = new HashMap<>();
+
+    /**
+     *  Another set of proposals that are known to have been decided (also initially empty).
+     */
     private HashMap<Integer, ClientRequest> decisions = new HashMap<>();
+
+
+    /**
+     * clients not yet responced.
+     */
+    private HashMap<ClientRequest, Integer> awaitingClients = new HashMap<>();
+
     private HashSet<ClientRequest> performed = new HashSet<>();
 
     public Replica(int id, Node machine, List<Integer> leaderIds) {
@@ -36,26 +73,25 @@ public class Replica {
     }
 
     /**
-     * Should be called from the replica's container to pass to the replica each message
-     * addressed to it.
-     *
+     * pass to the replica each message, addressed to it.
      * @param message Message that should be handled by the replica.
      */
     public void receiveMessage(ReplicaMessage message) {
         if (message instanceof GetRequest) {
             String key = ((GetRequest) message).key;
-            String value = data.get(key);
+            String value = state.get(key);
             if (value == null)
-                value = "none";
+                value = "NOT_FOUND";
+            else
+                value = "VALUE " + value;
 
-            // todo make better protocol
-            machine.sendToClient(message.getSource(), new DataMessage(message.getSource(), value));
+            machine.sendToClient(message.getSource(), new ClientResponse(message.getSource(), value));
+            return;
         }
-        if (message instanceof ClientRequest) {
+        else if (message instanceof ClientRequest) {
             requests.add((ClientRequest) message);
             awaitingClients.put((ClientRequest) message, message.getSource());
         }
-
 
         if (message instanceof DecisionMessage) {
             ClientRequest actualRequest = ((DecisionMessage) message).request;
@@ -82,15 +118,11 @@ public class Replica {
             }
         }
         propose();
-
-        //TODO need propose messages to paxos.
-
-        throw new IllegalArgumentException("now implemented yet");
     }
 
     private void propose() {
         while (!requests.isEmpty()) {
-            ClientRequest c = requests.first();
+            ClientRequest c = requests.iterator().next();
             machine.log.info(String.format("PROPOSING %s to %d", c, slotIn));
             if (!decisions.containsKey(slotIn)) {
                 requests.remove(c);
@@ -104,20 +136,21 @@ public class Replica {
     private void perform(ClientRequest c) {
         machine.log.info(String.format("PERFORMING %s at %d", c, slotOut));
         if (performed.contains(c))
-            return;
+            return;   // already performed.
+
         if (c instanceof SetRequest) {
-            data.put(((SetRequest) c).key, ((SetRequest) c).value);
+            state.put(((SetRequest) c).key, ((SetRequest) c).value);
             Integer awaitingClient = awaitingClients.get(c);
             if (awaitingClient != null) {
-                machine.sendToClient(awaitingClient, new DataMessage(c.getSource(), "STORED"));
+                machine.sendToClient(awaitingClient, new ClientResponse(c.getSource(), "STORED"));
                 awaitingClients.remove(awaitingClient);
             }
         }
         if (c instanceof DeleteRequest) {
-            boolean result = (data.remove(((DeleteRequest) c).key)) != null;
+            boolean result = (state.remove(((DeleteRequest) c).key)) != null;
             Integer awaitingClient = awaitingClients.get(c);
             if (awaitingClient != null) {
-                machine.sendToClient(awaitingClient, new DataMessage(c.getSource(), (result)? "DELETED": "NOT_FOUND"));
+                machine.sendToClient(awaitingClient, new ClientResponse(c.getSource(), (result)? "DELETED": "NOT_FOUND"));
                 awaitingClients.remove(awaitingClient);
             }
         }
