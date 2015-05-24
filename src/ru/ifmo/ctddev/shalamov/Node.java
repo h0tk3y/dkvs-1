@@ -25,7 +25,7 @@ public class Node implements Runnable, AutoCloseable {
     private String persistenceFileName;
 
     private FileWriter diskPersistence;
-    private Logger log = Logger.getLogger("node." + id);
+    public Logger log = Logger.getLogger("node." + id);
 
     private ServerSocket inSocket = null;
     private static Config globalConfig = null;

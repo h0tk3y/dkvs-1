@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
  */
 public class PhaseOneResponse extends LeaderMessage {
     Ballot originalBallot;
-    Ballot ballotNum;
-    Collection<ProposalValue> pvalues;
+    public Ballot ballotNum;
+    public Collection<ProposalValue> pvalues;
 
     public PhaseOneResponse(int fromId, Ballot originalBallot,
                             Ballot ballotNum, Collection<ProposalValue> pvalues) {

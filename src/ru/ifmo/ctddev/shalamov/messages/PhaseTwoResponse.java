@@ -7,8 +7,8 @@ import ru.ifmo.ctddev.shalamov.ProposalValue;
  * Created by viacheslav on 23.05.2015.
  */
 public class PhaseTwoResponse extends LeaderMessage {
-    Ballot ballot;
-    ProposalValue proposal;
+    public Ballot ballot;
+    public ProposalValue proposal;
 
     public PhaseTwoResponse(int fromId, Ballot ballot, ProposalValue proposal) {
         super(fromId);

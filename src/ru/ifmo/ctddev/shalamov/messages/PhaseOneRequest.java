@@ -6,7 +6,7 @@ import ru.ifmo.ctddev.shalamov.Ballot;
  * Created by viacheslav on 23.05.2015.
  */
 public class PhaseOneRequest extends AcceptorMessage {
-    PhaseOneRequest(int fromId, Ballot ballotNum) {
+    public PhaseOneRequest(int fromId, Ballot ballotNum) {
         super(fromId, ballotNum);
     }
 

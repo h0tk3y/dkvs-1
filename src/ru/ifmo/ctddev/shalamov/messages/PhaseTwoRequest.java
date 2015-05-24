@@ -9,7 +9,7 @@ import ru.ifmo.ctddev.shalamov.ProposalValue;
 public class PhaseTwoRequest extends AcceptorMessage {
     public ProposalValue payload;
 
-    PhaseTwoRequest(int fromId, ProposalValue payload) {
+    public PhaseTwoRequest(int fromId, ProposalValue payload) {
         super(fromId, payload.ballotNum);
         this.payload = payload;
     }
