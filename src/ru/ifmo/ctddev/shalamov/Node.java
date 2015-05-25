@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import ru.ifmo.ctddev.shalamov.messages.*;
 import ru.ifmo.ctddev.shalamov.messages.Message;
+import sun.awt.windows.ThemeReader;
 
 
 /**
@@ -135,7 +136,6 @@ public class Node implements Runnable, AutoCloseable {
                 }
         }).start();
 
-        // todo: what is no requests exist??
         localLeader.startLeader();
     }
 
@@ -292,8 +292,7 @@ public class Node implements Runnable, AutoCloseable {
      * @param nodeId
      */
     private void speakToNode(int nodeId) {
-        Socket clientSocket = new Socket();
-        nodes[nodeId].output = clientSocket;
+
 
         String address = globalConfig.address(nodeId);
         int port = globalConfig.port(nodeId);
@@ -305,6 +304,8 @@ public class Node implements Runnable, AutoCloseable {
 
         while (!stopping) {
             try {
+                Socket clientSocket = new Socket();
+                nodes[nodeId].output = clientSocket;
                 clientSocket.connect(new InetSocketAddress(address, port));
                 log.info(String.format("#%d: Connected to node.%d", id, nodeId));
                 sendToNode(nodeId, new NodeMessage(id));
@@ -336,7 +337,13 @@ public class Node implements Runnable, AutoCloseable {
                 }
             } catch (SocketException e) {
                 log.info(String.format("#%d: Connection to node.%d lost: %s", id, nodeId, e.getMessage()));
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             } catch (IOException e) {
+                log.info(String.format("#%d: Connection to node.%d lost: %s", id, nodeId, e.getMessage()));
             }
         }
     }

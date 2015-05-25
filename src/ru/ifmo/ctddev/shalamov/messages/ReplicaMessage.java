@@ -7,7 +7,4 @@ package ru.ifmo.ctddev.shalamov.messages;
  */
 public abstract class ReplicaMessage extends Message {
 
-//    public ReplicaMessage(int fromId, String text) {
-//        super(fromId, text);
-//    }
 }

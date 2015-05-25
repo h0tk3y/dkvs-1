@@ -11,6 +11,7 @@ public class Leader {
     int id;
 
     int last_ballot_num;
+
     Node machine;
     List<Integer> replicaIds;
     List<Integer> acceptorIds;
@@ -78,7 +79,7 @@ public class Leader {
     /**
      * Sent by either a scout or a commander, it means that some acceptor has adopted (r, L').
      * If(r, L') > ballot_num, it may no longer be possible
-     * to use ballot ballot num to choose a command.
+     * to use ballot ballot_num to choose a command.
      *
      * @param b
      */
@@ -86,8 +87,9 @@ public class Leader {
         machine.log.info(String.format("PREEMPTED: there's ballot %s", b));
         if (b.compareTo(currentBallot) > 0) {
             active = false;
-            currentBallot = new Ballot(++last_ballot_num, id);
-            machine.log.info(String.format("WAITING for %d to fail", b.leaderId));
+            machine.log.info(String.format("LEADER %d is NO MORE active!", id));
+            //currentBallot = new Ballot(++last_ballot_num, id);
+            //machine.log.info(String.format("WAITING for %d to fail", b.leaderId));
         }
     }
 

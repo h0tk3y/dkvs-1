@@ -41,14 +41,14 @@ public class Acceptor {
             if (message.ballotNum.compareTo(ballotNumber) > 0)
                 ballotNumber = message.ballotNum;
             machine.sendToNode(message.getSource(),
-                    new PhaseOneResponse(id, message.ballotNum, ballotNumber, accepted.values()));
+                    new PhaseOneResponse(message.getSource(), message.ballotNum, ballotNumber, accepted.values()));
             return;
         }
         if (message instanceof PhaseTwoRequest) {
             if (message.ballotNum == ballotNumber)
                 accepted.put(((PhaseTwoRequest) message).payload.slot, ((PhaseTwoRequest) message).payload);
             machine.sendToNode(message.getSource(),
-                    new PhaseTwoResponse(id, ballotNumber, ((PhaseTwoRequest) message).payload));
+                    new PhaseTwoResponse(message.getSource(), ballotNumber, ((PhaseTwoRequest) message).payload));
             return;
         }
         throw new IllegalStateException("Incorrect message");
