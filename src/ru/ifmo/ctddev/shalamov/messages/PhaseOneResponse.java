@@ -25,12 +25,12 @@ public class PhaseOneResponse extends LeaderMessage {
 
     @Override
     public String toString() {
-        return String.format("<p1b %d, %s, %s, %s>", fromId, originalBallot, ballotNum,
+        return String.format("p1b %d %s %s %s", fromId, originalBallot, ballotNum,
                 Joiner.on("_#_").join(pvalues));
     }
 
     public static PhaseOneResponse parse(String[] parts) {
-        if (parts[0] != "p1b")
+        if (! "p1b".equals(parts[0]))
             throw new IllegalArgumentException("PhaseOneResponse should start by \"p1b\"");
 
         int fromId = Integer.parseInt(parts[1]);

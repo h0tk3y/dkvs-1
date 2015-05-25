@@ -15,7 +15,7 @@ public class DecisionMessage extends ReplicaMessage {
 
     @Override
     public String toString() {
-        return String.format("<decision %d, %s>", slot, request);
+        return String.format("decision %d %s", slot, request);
     }
 
 }

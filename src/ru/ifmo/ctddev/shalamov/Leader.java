@@ -89,7 +89,7 @@ public class Leader {
             active = false;
             machine.log.info(String.format("LEADER %d is NO MORE active!", id));
             //currentBallot = new Ballot(++last_ballot_num, id);
-            //machine.log.info(String.format("WAITING for %d to fail", b.leaderId));
+            machine.log.info(String.format("WAITING for %d to fail", b.leaderId));
         }
     }
 
@@ -131,21 +131,23 @@ public class Leader {
         }
 
         public void receiveResonse(PhaseOneResponse response) {
-            if (response.ballotNum == currentBallot) {
+            if (response.ballotNum.equals(b)) {
                 response.pvalues.forEach(r ->
                         {
-                            if (!proposals.containsKey(r.slot) ||
-                                    r.ballotNum.compareTo(proposals.get(r.slot).ballotNum) > 0)
-                            proposals.put(r.slot, r);
+                            if ((!proposals.containsKey(r.slot)) ||
+                                    proposals.get(r.slot).ballotNum.lessThan(r.ballotNum)
+                                    )
+                                proposals.put(r.slot, r);
                         }
                 );
                 waitFor.remove(response.getSource());
 
-                if (waitFor.size() < acceptorIds.size() / 2) {
-                    adopted(currentBallot, proposals);
-                    scouts.remove(currentBallot);
+                if (waitFor.size() < (acceptorIds.size() + 1) / 2) {
+                    scouts.remove(b);
+                    adopted(b, proposals);
                 }
             } else {
+                scouts.remove(b);
                 preempted(response.ballotNum);
             }
         }
@@ -166,17 +168,19 @@ public class Leader {
         }
 
         public void receiveResponse(PhaseTwoResponse response) {
-            if (response.ballot == currentBallot) {
+            if (response.ballot.equals(currentBallot)) {
                 waitFor.remove(response.getSource());
-                if (waitFor.isEmpty() || waitFor.size() < acceptorIds.size() / 2) {
+                if (waitFor.size() < (acceptorIds.size() + 1) / 2) {
                     replicaIds.forEach(r ->
                                     machine.sendToNode(r, new DecisionMessage(response.proposal.slot,
                                             response.proposal.command))
                     );
                     commanders.remove(proposal);
                 }
-            } else
+            } else {
                 preempted(response.ballot);
+                commanders.remove(proposal);
+            }
         }
     }
 

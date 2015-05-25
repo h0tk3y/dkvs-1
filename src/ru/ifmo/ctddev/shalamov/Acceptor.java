@@ -38,17 +38,21 @@ public class Acceptor {
 
     public void receiveMessage(AcceptorMessage message) {
         if (message instanceof PhaseOneRequest) {
-            if (message.ballotNum.compareTo(ballotNumber) > 0)
+            if (ballotNumber.lessThan(message.ballotNum)) {
                 ballotNumber = message.ballotNum;
+                machine.logger.logPaxos("receiveMessage() in acceptor " + id, "ACCEPTOR ADOPTED " + ballotNumber);
+            }
             machine.sendToNode(message.getSource(),
-                    new PhaseOneResponse(message.getSource(), message.ballotNum, ballotNumber, accepted.values()));
+                    new PhaseOneResponse(id, message.ballotNum, ballotNumber, accepted.values()));
             return;
         }
         if (message instanceof PhaseTwoRequest) {
-            if (message.ballotNum == ballotNumber)
+            if (((PhaseTwoRequest) message).payload.ballotNum.equals(ballotNumber)) {
                 accepted.put(((PhaseTwoRequest) message).payload.slot, ((PhaseTwoRequest) message).payload);
+                machine.logger.logPaxos("receiveMessage() in acceptor " + id, "ACCEPTOR ACCEPTED " + ballotNumber);
+            }
             machine.sendToNode(message.getSource(),
-                    new PhaseTwoResponse(message.getSource(), ballotNumber, ((PhaseTwoRequest) message).payload));
+                    new PhaseTwoResponse(id, ballotNumber, ((PhaseTwoRequest) message).payload));
             return;
         }
         throw new IllegalStateException("Incorrect message");

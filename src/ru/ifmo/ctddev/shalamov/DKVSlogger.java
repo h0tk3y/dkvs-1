@@ -1,5 +1,8 @@
 package ru.ifmo.ctddev.shalamov;
 
+import ru.ifmo.ctddev.shalamov.messages.Message;
+
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -18,21 +21,24 @@ public class DKVSlogger {
     }
 
 
-    public void logConnection() {
+    public void logConnection(String where, String s) {
+        log.info(where + ":\n=== " + s);
     }
 
-    public void logMessageOut() {
-
+    public void logMessageOut(String where, String message) {
+        log.info(where + ":\n<< " + message);
     }
 
-    public void logMessageIn() {
-
+    public void logMessageIn(String where, String message) {
+        log.info(where + ":\n>> " + message);
     }
 
-    public void LogPaxos() {
+    public void logPaxos(String where, String s) {
+        log.info(where + ":\n### " + s);
     }
 
-    public void LogError() {
+    public void logError(String where, String s) {
+        log.log(Level.INFO, where + ":\n!!! error: " + s);
     }
 
 }

@@ -25,7 +25,6 @@ import sun.awt.windows.ThemeReader;
 public class Node implements Runnable, AutoCloseable {
     private int id;
 
-    //todo: implement a better logger
     public Logger log = Logger.getLogger("node." + id);
 
     private ServerSocket inSocket = null;
@@ -70,6 +69,8 @@ public class Node implements Runnable, AutoCloseable {
 
     private Persistence localPersistence;
 
+    public DKVSlogger logger;
+
 
 //------------------METHODS----------------------------------------------------
 
@@ -93,8 +94,10 @@ public class Node implements Runnable, AutoCloseable {
             inSocket = new ServerSocket(globalConfig.port(id));
             nodes = new CommunicationEntry[globalConfig.nodesCount()];
             localReplica = new Replica(id, this, Arrays.asList(0)); // todo: only one leader.!!!!
-            localLeader = new Leader(id,this,globalConfig.ids(), globalConfig.ids());
+            localLeader = new Leader(id, this, globalConfig.ids(), globalConfig.ids());
             localAcceptor = new Acceptor(id, this);
+            logger = new DKVSlogger(id);
+
             for (int i = 0; i < globalConfig.nodesCount(); ++i) {
                 nodes[i] = new CommunicationEntry();
             }
@@ -154,11 +157,14 @@ public class Node implements Runnable, AutoCloseable {
                     // (re)connection
                     int nodeId = Integer.parseInt(parts[1]);
                     try {
-                        nodes[nodeId].input.close();
+                        if (nodes[nodeId].input != null)
+                            nodes[nodeId].input.close();
                     } catch (IOException e) {
                     }
                     nodes[nodeId].input = client;
-                    log.info(String.format("#%d: Started listening to node.%d from %s", id, nodeId, client.getInetAddress()));
+                    //log.info(String.format("#%d: Started listening to node.%d from %s", id, nodeId, client.getInetAddress()));
+                    logger.logConnection("handleRequest(node:" + nodeId + ")",
+                            String.format("#%d: Started listening to node.%d from %s", id, nodeId, client.getInetAddress()));
                     listenToNode(bufferedReader, nodeId);
                     break;
                 case "get":
@@ -172,7 +178,7 @@ public class Node implements Runnable, AutoCloseable {
                     clients.put(newClientId, entry);
 
                     // We've already read a message from stream. Have to handle it:
-                    Message firstMessage = Message.parse(newClientId, parts);
+                    Message firstMessage = ClientRequest.parse(newClientId, parts);
                     while (!stopping) {
                         try {
                             incomingMessages.put(firstMessage);
@@ -187,10 +193,20 @@ public class Node implements Runnable, AutoCloseable {
                         speakToClient(newClientId);
                     }).start();
 
-                    log.info(String.format("#%d: Client %d connected.", id, newClientId));
+                    //log.info(String.format("#%d: Client %d connected.", id, newClientId));
+                    logger.logConnection("handleRequest(client:" + newClientId + ")",
+                            String.format("Client %d connected to %d.", newClientId, id));
                     listenToClient(bufferedReader, newClientId);
                     break;
                 default:
+                    logger.logMessageIn("handleRequest( ... )",
+                            "something goes wrong: \"" + parts[0] + "\" received from " + parts[1]);
+                    try {
+                        incomingMessages.putLast(Message.parse(Integer.parseInt(parts[1]), parts));
+                    } catch (InterruptedException e) {
+                        logger.logError("handleRequest( ... )", e.getMessage());
+                        e.printStackTrace();
+                    }
                     break;
             }
 
@@ -200,7 +216,7 @@ public class Node implements Runnable, AutoCloseable {
     }
 
     /**
-     * Poll's messages from incoming queue and process them.
+     * Takes messages in infinite loop from incoming queue and process them.
      */
     private void handleMessages() {
         while (true) {
@@ -210,24 +226,32 @@ public class Node implements Runnable, AutoCloseable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(m == null)
+            if (m == null)
                 continue;
-            log.info(String.format("Handling message: %s", m));
+            //log.info(String.format("Handling message: %s", m));
+            logger.logMessageIn("handleMessages()",
+                    String.format("Handling message: %s", m));
 
             if (m instanceof ReplicaMessage) {
                 localReplica.receiveMessage((ReplicaMessage) m);
+                return;
             }
             if (m instanceof LeaderMessage) {
                 //localLeader.startLeader();
                 localLeader.receiveMessage((LeaderMessage) m);
+                return;
             }
             if (m instanceof AcceptorMessage) {
                 localAcceptor.receiveMessage((AcceptorMessage) m);
+                return;
             }
 
             if (m instanceof PingMessage) {
                 sendToNode(m.getSource(), new PongMessage(id));
+                return;
             }
+            logger.logMessageIn("handleMessages()",
+                    String.format("Unknown message: %s", m));
         }
     }
 
@@ -251,13 +275,17 @@ public class Node implements Runnable, AutoCloseable {
      * @param nodeId  id of node, which is on the other end of this socket.
      */
     private void listenToNode(BufferedReader breader, int nodeId) {
+        logger.logConnection("listenToNode(nodeId:" + nodeId + ")",
+                "started listening to Node " + nodeId);
         while (!stopping) {
             try {
                 String data = breader.readLine();
-                Message m = Message.parse(nodeId, data.split(""));
+
+                Message m = Message.parse(nodeId, data.split(" "));
                 incomingMessages.offer(m);
             } catch (IOException e) {
-                log.info(e.getMessage());
+                logger.logError("listenToNode(nodeId:" + nodeId + ")",
+                        "listening to Node " + nodeId + ": " + e.getMessage());
             }
         }
     }
@@ -292,13 +320,12 @@ public class Node implements Runnable, AutoCloseable {
      * @param nodeId
      */
     private void speakToNode(int nodeId) {
-
-
         String address = globalConfig.address(nodeId);
         int port = globalConfig.port(nodeId);
 
         if (address == null) {
-            log.info(String.format("#%d: Couldn't get address for %d, closing.", id, nodeId));
+            logger.logError("speakToNode(nodeId" + nodeId + ")",
+                    String.format("#%d: Couldn't get address for %d, closing.", id, nodeId));
             return;
         }
 
@@ -307,8 +334,9 @@ public class Node implements Runnable, AutoCloseable {
                 Socket clientSocket = new Socket();
                 nodes[nodeId].output = clientSocket;
                 clientSocket.connect(new InetSocketAddress(address, port));
-                log.info(String.format("#%d: Connected to node.%d", id, nodeId));
-                sendToNode(nodeId, new NodeMessage(id));
+                logger.logConnection("speakToNode(nodeId: " + nodeId + ")",
+                        String.format("#%d: Connected to node.%d", id, nodeId));
+                sendToNodeAtFirst(nodeId, new NodeMessage(id));
                 OutputStreamWriter writer = new OutputStreamWriter(clientSocket.getOutputStream(), CHARSET);
 
                 while (!stopping) {
@@ -328,22 +356,31 @@ public class Node implements Runnable, AutoCloseable {
                         }
                     }
                     try {
-                        log.info(String.format("#%d: Sending to %d: %s", id, nodeId, m));
+                        logger.logMessageOut("speakToNode(nodeId: " + nodeId + ")",
+                                String.format("#%d: Sending to %d: %s", id, nodeId, m));
                         writer.write(m + "\n");
+                        writer.flush();
                     } catch (IOException ioe) {
-                        log.info(String.format("#%d: Couldn't send a message. Retrying.", id));
+                        logger.logError("speakToNode(nodeId: " + nodeId + ")",
+                                String.format(
+                                        "SPEAK TO NODE; Couldn't send a message from %d to %d. Retrying.",
+                                        id, nodeId));
                         nodes[nodeId].messages.addFirst(m);
                     }
                 }
             } catch (SocketException e) {
-                log.info(String.format("#%d: Connection to node.%d lost: %s", id, nodeId, e.getMessage()));
+                logger.logError("speakToNode(nodeId: " + nodeId + ")",
+                        String.format("SPEAK TO NODE; Connection from %d to node.%d lost: %s",
+                                id, nodeId, e.getMessage()));
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
             } catch (IOException e) {
-                log.info(String.format("#%d: Connection to node.%d lost: %s", id, nodeId, e.getMessage()));
+                logger.logError("speakToNode(nodeId: " + nodeId + ")",
+                        String.format("SPEAK TO NODE; Connection from %d to node.%d lost: %s",
+                                id, nodeId, e.getMessage()));
             }
         }
     }
@@ -369,11 +406,13 @@ public class Node implements Runnable, AutoCloseable {
                 if (m == null)
                     continue;
                 try {
-                    log.info(String.format("#%d: Sending to client %d: %s", id, clientId, m));
+                    logger.logMessageOut("speakToClient(clientId: " + clientId + ")",
+                            String.format("#%d: Sending to client %d: %s", id, clientId, m));
                     writer.write(String.format("%s\n", m));
                     writer.flush();
                 } catch (IOException ioe) {
-                    log.info("Couldn't send a message. Retrying.");
+                    logger.logMessageOut("speakToClient(clientId: " + clientId + ")",
+                            "Couldn't send a message. Retrying.");
                     nodes[clientId].messages.addFirst(m);
                 }
             }
@@ -395,6 +434,21 @@ public class Node implements Runnable, AutoCloseable {
                     incomingMessages.put(message);
                 else
                     nodes[to].messages.put(message);
+                break;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
+    }
+
+    public void sendToNodeAtFirst(int to, Message message) {
+        while (!stopping) {
+            try {
+                if (to == id)
+                    incomingMessages.putFirst(message);
+                else
+                    nodes[to].messages.putFirst(message);
                 break;
             } catch (InterruptedException e) {
                 e.printStackTrace();

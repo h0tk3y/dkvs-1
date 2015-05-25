@@ -12,6 +12,10 @@ public class Ballot implements Comparable<Ballot> {
         this.leaderId = leaderId;
     }
 
+    public boolean lessThan(Ballot other) {
+        return this.compareTo(other) < 0;
+    }
+
 
     @Override
     public int compareTo(Ballot other) {
@@ -19,7 +23,15 @@ public class Ballot implements Comparable<Ballot> {
         if (result != 0)
             return result;
         else
-            return new Integer(leaderId).compareTo(other.leaderId);
+            return -(new Integer(leaderId).compareTo(other.leaderId)); // inverted order.
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Ballot)
+            return ballotNum == ((Ballot) other).ballotNum && leaderId == ((Ballot) other).leaderId;
+        else
+            return false;
     }
 
     @Override

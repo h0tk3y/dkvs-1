@@ -123,7 +123,7 @@ public class Replica {
     private void propose() {
         while (!requests.isEmpty()) {
             ClientRequest c = requests.iterator().next();
-            machine.log.info(String.format("PROPOSING %s to %d", c, slotIn));
+            machine.log.info(String.format("PROPOSING %s to slot %d", c, slotIn));
             if (!decisions.containsKey(slotIn)) {
                 requests.remove(c);
                 proposals.put(slotIn, c);
