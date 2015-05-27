@@ -20,18 +20,24 @@ public class Ballot implements Comparable<Ballot> {
     @Override
     public int compareTo(Ballot other) {
         int result = new Integer(ballotNum).compareTo(other.ballotNum);
-        if (result != 0)
-            return result;
-        else
-            return -(new Integer(leaderId).compareTo(other.leaderId)); // inverted order.
+        if (result == 0)
+            result = new Integer(other.leaderId).compareTo(leaderId);
+        // inverted order.
+        return result;
+
     }
 
     @Override
     public boolean equals(Object other) {
         if (other instanceof Ballot)
-            return ballotNum == ((Ballot) other).ballotNum && leaderId == ((Ballot) other).leaderId;
+            return (ballotNum == ((Ballot) other).ballotNum) && (leaderId == ((Ballot) other).leaderId);
         else
             return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
     }
 
     @Override

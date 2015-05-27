@@ -11,8 +11,8 @@ public class Replica {
     int id;
 
     /**
-     *  The set of leaders in the current conﬁguration. The leaders of the
-     *  initial conﬁguration are passed as an argument to the replica.
+     * The set of leaders in the current conﬁguration. The leaders of the
+     * initial conﬁguration are passed as an argument to the replica.
      */
     List<Integer> leaderIds;
 
@@ -26,35 +26,35 @@ public class Replica {
 
 
     /**
-     *  The index of the next slot in which the replica has not yet proposed any command.
+     * The index of the next slot in which the replica has not yet proposed any command.
      */
     public volatile int slotIn = 0;
 
     /**
-     *  The index of the next slot for which it needs to learn a decision
-     *  before it can update its copy of the application state, equivalent
-     *  to the state’s version number (i.e., number of updates).
+     * The index of the next slot for which it needs to learn a decision
+     * before it can update its copy of the application state, equivalent
+     * to the state’s version number (i.e., number of updates).
      */
     public volatile int slotOut = 0;
 
     /**
-     *  The replica’s copy of the application state, which we will treat as opaque.
-     *  All replicas start with the same initial application state.
+     * The replica’s copy of the application state, which we will treat as opaque.
+     * All replicas start with the same initial application state.
      */
     private HashMap<String, String> state = new HashMap<>();
 
     /**
-     *  An initially empty set of requests that the replica has received and are not yet proposed or decided.
+     * An initially empty set of requests that the replica has received and are not yet proposed or decided.
      */
     private HashSet<ClientRequest> requests = new HashSet<>();
 
     /**
-     *  An initially empty set of proposals that are currently outstanding.
+     * An initially empty set of proposals that are currently outstanding.
      */
     private HashMap<Integer, ClientRequest> proposals = new HashMap<>();
 
     /**
-     *  Another set of proposals that are known to have been decided (also initially empty).
+     * Another set of proposals that are known to have been decided (also initially empty).
      */
     private HashMap<Integer, ClientRequest> decisions = new HashMap<>();
 
@@ -74,6 +74,7 @@ public class Replica {
 
     /**
      * pass to the replica each message, addressed to it.
+     *
      * @param message Message that should be handled by the replica.
      */
     public void receiveMessage(ReplicaMessage message) {
@@ -87,8 +88,7 @@ public class Replica {
 
             machine.sendToClient(message.getSource(), new ClientResponse(message.getSource(), value));
             return;
-        }
-        else if (message instanceof ClientRequest) {
+        } else if (message instanceof ClientRequest) {
             requests.add((ClientRequest) message);
             awaitingClients.put((ClientRequest) message, message.getSource());
         }
@@ -147,10 +147,17 @@ public class Replica {
             }
         }
         if (c instanceof DeleteRequest) {
-            boolean result = (state.remove(((DeleteRequest) c).key)) != null;
+            if(performed.contains(c))
+                return;
+            boolean result = state.containsKey(((DeleteRequest) c).key);
+            state.remove(((DeleteRequest) c).key);
+
+            //ClientResponse resp = new ClientResponse(c.getSource(), (result)? "DELETED": "NOT_FOUND");
+            ClientResponse resp = new ClientResponse(c.getSource(), "DELETED " + result);
+
             Integer awaitingClient = awaitingClients.get(c);
             if (awaitingClient != null) {
-                machine.sendToClient(awaitingClient, new ClientResponse(c.getSource(), (result)? "DELETED": "NOT_FOUND"));
+                machine.sendToClient(awaitingClient, resp);
                 awaitingClients.remove(awaitingClient);
             }
         }

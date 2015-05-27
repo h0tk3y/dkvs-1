@@ -15,8 +15,8 @@ public abstract class ClientRequest extends ReplicaMessage {
             case "get":
                 return new GetRequest(clientId, parts[1]);
             case "set":
-                return new SetRequest(clientId, parts[1],
-                        Joiner.on(" ").join(Arrays.copyOfRange(parts, 2, parts.length)));
+                return new SetRequest(clientId, parts[1], parts[2]);
+                        //Joiner.on(" ").join(Arrays.copyOfRange(parts, 2, parts.length)));
             case "delete":
                 return new DeleteRequest(clientId, parts[1]);
             default:

@@ -32,6 +32,11 @@ public class Client {
             while (true) {
                 String command = reader.readLine();
                 System.out.println("request: " + command);
+                if(command == null)
+                {
+                    socketWriter.close();
+                    return;
+                }
 
                 socketWriter.write(command + "\n");
                 socketWriter.flush();

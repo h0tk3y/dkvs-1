@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Created by viacheslav on 23.05.2015.
  */
 public class PhaseOneResponse extends LeaderMessage {
-    Ballot originalBallot;
+    public Ballot originalBallot;
     public Ballot ballotNum;
     public Collection<ProposalValue> pvalues;
 

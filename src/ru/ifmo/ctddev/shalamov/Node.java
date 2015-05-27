@@ -109,8 +109,12 @@ public class Node implements Runnable, AutoCloseable {
     @Override
     public void run() {
         if (started)
-            throw new IllegalStateException("Cannot start a node which has already been started");
+            throw new IllegalStateException("Cannot start a node twice");
         started = true;
+
+        logger.logConnection("run()", "starting node");
+
+        localLeader.startLeader();
 
         // create output sockets and try to process output messages.
         for (int i = 0; i < globalConfig.nodesCount(); ++i) {
@@ -139,7 +143,6 @@ public class Node implements Runnable, AutoCloseable {
                 }
         }).start();
 
-        localLeader.startLeader();
     }
 
     /**
@@ -151,7 +154,11 @@ public class Node implements Runnable, AutoCloseable {
         try {
             InputStreamReader reader = new InputStreamReader(client.getInputStream(), CHARSET);
             BufferedReader bufferedReader = new BufferedReader(reader);
-            String[] parts = bufferedReader.readLine().split(" ");
+            String msg = bufferedReader.readLine();
+            String[] parts = msg.split(" ");
+
+            logger.logMessageIn("handleRequest():", "GOT message ["+msg+"] with request" );
+
             switch (parts[0]) {
                 case "node":
                     // (re)connection
@@ -179,14 +186,8 @@ public class Node implements Runnable, AutoCloseable {
 
                     // We've already read a message from stream. Have to handle it:
                     Message firstMessage = ClientRequest.parse(newClientId, parts);
-                    while (!stopping) {
-                        try {
-                            incomingMessages.put(firstMessage);
-                            break;
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    sendToNode(id, firstMessage);
+
 
                     /** Spawn communication thread. */
                     new Thread(() -> {
@@ -201,12 +202,12 @@ public class Node implements Runnable, AutoCloseable {
                 default:
                     logger.logMessageIn("handleRequest( ... )",
                             "something goes wrong: \"" + parts[0] + "\" received from " + parts[1]);
-                    try {
-                        incomingMessages.putLast(Message.parse(Integer.parseInt(parts[1]), parts));
-                    } catch (InterruptedException e) {
-                        logger.logError("handleRequest( ... )", e.getMessage());
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        incomingMessages.putLast(Message.parse(Integer.parseInt(parts[1]), parts));
+//                    } catch (InterruptedException e) {
+//                        logger.logError("handleRequest( ... )", e.getMessage());
+//                        e.printStackTrace();
+//                    }
                     break;
             }
 
@@ -219,7 +220,7 @@ public class Node implements Runnable, AutoCloseable {
      * Takes messages in infinite loop from incoming queue and process them.
      */
     private void handleMessages() {
-        while (true) {
+        while (!stopping) {
             Message m = null;
             try {
                 m = incomingMessages.take();
@@ -228,27 +229,26 @@ public class Node implements Runnable, AutoCloseable {
             }
             if (m == null)
                 continue;
-            //log.info(String.format("Handling message: %s", m));
+
             logger.logMessageIn("handleMessages()",
                     String.format("Handling message: %s", m));
 
             if (m instanceof ReplicaMessage) {
                 localReplica.receiveMessage((ReplicaMessage) m);
-                return;
+                continue;
             }
             if (m instanceof LeaderMessage) {
-                //localLeader.startLeader();
                 localLeader.receiveMessage((LeaderMessage) m);
-                return;
+                continue;
             }
             if (m instanceof AcceptorMessage) {
                 localAcceptor.receiveMessage((AcceptorMessage) m);
-                return;
+                continue;
             }
 
             if (m instanceof PingMessage) {
                 sendToNode(m.getSource(), new PongMessage(id));
-                return;
+                continue;
             }
             logger.logMessageIn("handleMessages()",
                     String.format("Unknown message: %s", m));
@@ -275,17 +275,22 @@ public class Node implements Runnable, AutoCloseable {
      * @param nodeId  id of node, which is on the other end of this socket.
      */
     private void listenToNode(BufferedReader breader, int nodeId) {
-        logger.logConnection("listenToNode(nodeId:" + nodeId + ")",
-                "started listening to Node " + nodeId);
+//        logger.logConnection("listenToNode(nodeId:" + nodeId + ")",
+//                "started listening to Node " + nodeId);
         while (!stopping) {
             try {
                 String data = breader.readLine();
 
                 Message m = Message.parse(nodeId, data.split(" "));
-                incomingMessages.offer(m);
+                logger.logMessageIn("listenToNode(nodeId:" + nodeId + ")",
+                        "GOT message [" + m + "] from " + nodeId + ". passed to queue.");
+
+                sendToNode(id, m); // incomingMessages.put(m);
+
             } catch (IOException e) {
                 logger.logError("listenToNode(nodeId:" + nodeId + ")",
-                        "listening to Node " + nodeId + ": " + e.getMessage());
+                        nodeId + ": " + e.getMessage());
+                break;
             }
         }
     }
@@ -298,14 +303,16 @@ public class Node implements Runnable, AutoCloseable {
      * @param clientId
      */
     private void listenToClient(BufferedReader reader, Integer clientId) {
-        log.info(String.format("#%d: Client %d connected.", id, clientId));
+        logger.logConnection("listenToClient()", String.format("#%d: Client %d connected. Started listening.", id, clientId));
         while (!stopping) {
             try {
+                // todo pass socket instad of bufferedreader
                 String[] parts = reader.readLine().split(" ");
                 ClientRequest message = ClientRequest.parse(clientId, parts);
                 if (message != null) {
                     log.info(String.format("receiver message %s from client %d", message, message.getSource()));
-                    incomingMessages.add(message);
+                    sendToNode(id, message);
+                    //incomingMessages.put(message);
                 }
             } catch (IOException e) {
                 log.info(String.format("Lost connection to Client %d: %s", clientId, e.getMessage()));
@@ -337,6 +344,8 @@ public class Node implements Runnable, AutoCloseable {
                 logger.logConnection("speakToNode(nodeId: " + nodeId + ")",
                         String.format("#%d: Connected to node.%d", id, nodeId));
                 sendToNodeAtFirst(nodeId, new NodeMessage(id));
+                logger.logMessageOut("speakToNode(nodeId: " + nodeId + ")",
+                        String.format("adding node %d to queue for %d", id, nodeId));
                 OutputStreamWriter writer = new OutputStreamWriter(clientSocket.getOutputStream(), CHARSET);
 
                 while (!stopping) {
@@ -356,10 +365,10 @@ public class Node implements Runnable, AutoCloseable {
                         }
                     }
                     try {
-                        logger.logMessageOut("speakToNode(nodeId: " + nodeId + ")",
-                                String.format("#%d: Sending to %d: %s", id, nodeId, m));
                         writer.write(m + "\n");
                         writer.flush();
+                        logger.logMessageOut("speakToNode(nodeId: " + nodeId + ")",
+                                String.format("SENT to %d: %s", nodeId, m));
                     } catch (IOException ioe) {
                         logger.logError("speakToNode(nodeId: " + nodeId + ")",
                                 String.format(

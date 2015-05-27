@@ -54,6 +54,8 @@ public class Leader {
     }
 
     public void receiveMessage(LeaderMessage message) {
+        machine.logger.logMessageIn("Leader::receiveMessage()", "pushed message [" + message+"]");
+
         if (message instanceof ProposeMessage) {
             if (!proposals.containsKey(((ProposeMessage) message).slot)) {
                 proposals.put(((ProposeMessage) message).slot, ((ProposeMessage) message).request);
@@ -64,10 +66,11 @@ public class Leader {
             }
         }
         if (message instanceof PhaseOneResponse) {
-            Ballot ballot = ((PhaseOneResponse) message).ballotNum;
+            Ballot ballot = ((PhaseOneResponse) message).originalBallot;
             Scout scout = scouts.get(ballot);
-            scout.receiveResonse((PhaseOneResponse) message);
+            scout.receiveResonse((PhaseOneResponse) message);  // NPE!!!!
         }
+
         if (message instanceof PhaseTwoResponse) {
             ProposalValue proposal = ((PhaseTwoResponse) message).proposal;
             Commander commander = commanders.get(proposal);
@@ -143,11 +146,11 @@ public class Leader {
                 waitFor.remove(response.getSource());
 
                 if (waitFor.size() < (acceptorIds.size() + 1) / 2) {
-                    scouts.remove(b);
+                    //scouts.remove(b);
                     adopted(b, proposals);
                 }
             } else {
-                scouts.remove(b);
+                //scouts.remove(b);
                 preempted(response.ballotNum);
             }
         }
@@ -175,11 +178,11 @@ public class Leader {
                                     machine.sendToNode(r, new DecisionMessage(response.proposal.slot,
                                             response.proposal.command))
                     );
-                    commanders.remove(proposal);
+                    //commanders.remove(proposal);
                 }
             } else {
                 preempted(response.ballot);
-                commanders.remove(proposal);
+                //commanders.remove(proposal);
             }
         }
     }

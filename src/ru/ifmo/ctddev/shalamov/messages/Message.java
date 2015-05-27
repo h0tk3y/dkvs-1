@@ -59,6 +59,11 @@ public abstract class Message {
                 throw new IllegalArgumentException("Unknown message.");
         }
     }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
 }
 
 

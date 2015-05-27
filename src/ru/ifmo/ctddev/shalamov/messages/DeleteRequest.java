@@ -17,4 +17,15 @@ public class DeleteRequest extends ClientRequest {
     public String toString() {
         return String.format("delete %d %s", fromId, key);
     }
+
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof GetRequest) {
+            if (this.toString().equals(other.toString()))
+                return true;
+        }
+        return false;
+    }
+
 }
