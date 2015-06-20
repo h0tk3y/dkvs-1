@@ -10,7 +10,6 @@ import java.util.logging.Logger;
  */
 public class DKVSlogger {
 
-    // todo: not implementes yet.
 
     private int id;
     public java.util.logging.Logger log;
@@ -35,6 +34,10 @@ public class DKVSlogger {
 
     public void logPaxos(String where, String s) {
         log.info(where + ":\n### " + s);
+    }
+
+    public void logPaxos(String s) {
+        log.info("paxos" + ":\n### " + s);
     }
 
     public void logError(String where, String s) {

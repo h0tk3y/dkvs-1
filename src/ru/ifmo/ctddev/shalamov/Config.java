@@ -58,6 +58,7 @@ public class Config {
 
     /**
      * Return Leader's ids. just for now - all nodes are leaders.
+     *
      * @return
      */
     public List<Integer> ids() {

@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 /**
  * An acceptor is passive and only sends messages in response to requests.
- * It runs in an inﬁnite loop, receiving two kinds of request messages from leaders.
+ * It runs in an infinite loop, receiving two kinds of request messages from leaders.
  * <p>
  * See full reference at [http://www.cs.cornell.edu/courses/cs7412/2011sp/paxos.pdf]
  * <p>
@@ -31,8 +31,7 @@ public class Acceptor {
     public Acceptor(int id, Node machine) {
         this.id = id;
         this.machine = machine;
-        this.ballotNumber = new Ballot(-1, 0);
-        //    Ballot(1,globalConfig.ids.first()
+        this.ballotNumber = new Ballot(machine.persistence.lastBallotNum - 1, Node.globalConfig.ids().get(0));
         this.accepted = new HashMap<>();
     }
 

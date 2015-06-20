@@ -14,12 +14,17 @@ import java.util.Random;
  */
 public class Client {
     public static void main(String[] args) {
+
+        int id = 0;
+        if(args.length != 0)
+            id = Integer.parseInt(args[0]);
+
         String listOfPorts = "5454 5455 5456";
-        System.out.println(listOfPorts+ ": picked first");
+        System.out.println(listOfPorts + ": picked first");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
-            int port = Integer.parseInt(listOfPorts.split(" ")[0]);
+            int port = Integer.parseInt(listOfPorts.split(" ")[id]);
             Socket socket = new Socket();
             InetSocketAddress address = new InetSocketAddress("localhost", port);
             socket.connect(address);
@@ -32,8 +37,7 @@ public class Client {
             while (true) {
                 String command = reader.readLine();
                 System.out.println("request: " + command);
-                if(command == null)
-                {
+                if (command == null) {
                     socketWriter.close();
                     return;
                 }
@@ -42,10 +46,9 @@ public class Client {
                 socketWriter.flush();
 
                 String response = bufferedReader.readLine();
-                System.out.println("response: "+ response);
+                System.out.println("response: " + response);
             }
-        }catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }

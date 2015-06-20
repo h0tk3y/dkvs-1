@@ -13,7 +13,7 @@ public class GetRequest extends ClientRequest {
 
     @Override
     public String toString() {
-        return String.format("[get %d, %s]", fromId, key);
+        return String.format("get %d, %s", fromId, key);
     }
 
     @Override

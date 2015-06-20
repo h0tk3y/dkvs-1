@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 public class ProposalValue {
     public Ballot ballotNum;
     public int slot;
-    public ClientRequest command;
+    public Descriptor command;
 
-    ProposalValue(Ballot ballotNum, int slot, ClientRequest command) {
+    ProposalValue(Ballot ballotNum, int slot, Descriptor command) {
         this.ballotNum = ballotNum;
         this.slot = slot;
         this.command = command;
@@ -28,14 +28,15 @@ public class ProposalValue {
     }
 
     public static ProposalValue parse(String[] parts) {
-        String[] tail = Arrays.copyOfRange(parts, 4, parts.length);
-        String[] head = new String[1];
-        head[0] = parts[2];
-        String[] both = Stream.concat(Arrays.stream(head), Arrays.stream(tail))
-                .toArray(String[]::new);
-        return new ProposalValue(Ballot.parse(parts[0]),
+//        String[] tail = Arrays.copyOfRange(parts, 4, parts.length);
+//        String[] head = new String[1];
+//        head[0] = parts[2];
+//        String[] both = Stream.concat(Arrays.stream(head), Arrays.stream(tail))
+//                .toArray(String[]::new);
+        ProposalValue pv = new ProposalValue(Ballot.parse(parts[0]),
                 Integer.parseInt(parts[1]),
-                ClientRequest.parse(Integer.parseInt(parts[3]), both));
+                Descriptor.parse(Arrays.copyOfRange(parts, 2, parts.length)));
+        return pv;
     }
 
     @Override

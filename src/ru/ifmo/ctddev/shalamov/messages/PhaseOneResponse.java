@@ -30,7 +30,7 @@ public class PhaseOneResponse extends LeaderMessage {
     }
 
     public static PhaseOneResponse parse(String[] parts) {
-        if (! "p1b".equals(parts[0]))
+        if (!"p1b".equals(parts[0]))
             throw new IllegalArgumentException("PhaseOneResponse should start by \"p1b\"");
 
         int fromId = Integer.parseInt(parts[1]);

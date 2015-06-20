@@ -13,6 +13,6 @@ public class PingMessage extends Message {
 
     @Override
     public String toString() {
-        return "ping";
+        return "ping from " + fromId;
     }
 }

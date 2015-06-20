@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.google.common.base.Joiner;
 import ru.ifmo.ctddev.shalamov.Ballot;
+import ru.ifmo.ctddev.shalamov.Descriptor;
 import ru.ifmo.ctddev.shalamov.ProposalValue;
 
 /**
@@ -45,16 +46,22 @@ public abstract class Message {
 
             case "decision":
                 return new DecisionMessage(Integer.parseInt(parts[1]),
-                        ClientRequest.parse(fromId, Arrays.copyOfRange(parts, 2, parts.length)));
+                        Descriptor.parse(Arrays.copyOfRange(parts, 2, parts.length)));
 
-            case "propose": return new ProposeMessage(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]),
-                     ClientRequest.parse(fromId, Arrays.copyOfRange(parts, 3, parts.length)));
-            case "p1a": return new PhaseOneRequest(Integer.parseInt(parts[1]), Ballot.parse(parts[2]));
-            case "p2a": return new PhaseTwoRequest(Integer.parseInt(parts[1]),
-                    ProposalValue.parse(Arrays.copyOfRange(parts, 2, parts.length)));
-            case "p1b": return PhaseOneResponse.parse(parts);
-            case "p2b": return new PhaseTwoResponse(Integer.parseInt(parts[1]), Ballot.parse(parts[2]),
-                    ProposalValue.parse(Arrays.copyOfRange(parts, 3, parts.length)));
+            case "propose":
+                return new ProposeMessage(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]),
+                        Descriptor.parse(Arrays.copyOfRange(parts, 3, parts.length)));
+
+            case "p1a":
+                return new PhaseOneRequest(Integer.parseInt(parts[1]), Ballot.parse(parts[2]));
+            case "p2a":
+                return new PhaseTwoRequest(Integer.parseInt(parts[1]),
+                        ProposalValue.parse(Arrays.copyOfRange(parts, 2, parts.length)));
+            case "p1b":
+                return PhaseOneResponse.parse(parts);
+            case "p2b":
+                return new PhaseTwoResponse(Integer.parseInt(parts[1]), Ballot.parse(parts[2]),
+                        ProposalValue.parse(Arrays.copyOfRange(parts, 3, parts.length)));
             default:
                 throw new IllegalArgumentException("Unknown message.");
         }

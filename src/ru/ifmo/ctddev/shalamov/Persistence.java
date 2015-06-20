@@ -1,8 +1,12 @@
 package ru.ifmo.ctddev.shalamov;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
+import com.google.common.base.Joiner;
+
+import java.awt.*;
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by viacheslav on 24.05.2015.
@@ -11,8 +15,11 @@ public class Persistence {
     int nodeId;
 
     public String fileName;
-    private FileWriter writer = null;
+    private BufferedWriter writer = null;
 
+    /**
+     * the first not used high-part of ballots.
+     */
     public volatile int lastBallotNum = 0;
 
     /**
@@ -22,39 +29,91 @@ public class Persistence {
      */
     public volatile HashMap<String, String> keyValueStorage;
 
-    public volatile int lastSlotOut = 0;
+    /**
+     * last executed slot.
+     */
+    public volatile int lastSlotOut = -1;
 
     public Persistence(int nodeId) {
         this.nodeId = nodeId;
         fileName = String.format("dkvs_%d.log", nodeId);
         try {
-            writer = new FileWriter(fileName, true);
+            writer = new BufferedWriter(new FileWriter(fileName, true));
         } catch (IOException e) {
             e.printStackTrace();
         }
         keyValueStorage = new HashMap<>();
-    }
+
+        BufferedReader reader = null;
+
+        try {
+            File file = new File(fileName);
+            reader = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("no log file!!!");
+            System.exit(1);
+        }
+
+        ArrayList<String> lines = new ArrayList<>();
+        for (String line : reader.lines().collect(Collectors.toList()))
+            lines.add(line);
+        Collections.reverse(lines);
+
+        HashMap<String, String> temporaryStorage = new HashMap<>();
+        HashSet<String> removedKeys = new HashSet<>();
 
 
-    public synchronized int nextBallotNum() {
-        lastBallotNum += 1;
-        return lastBallotNum;
-    }
+        here:
+        for (String l : lines) {
+            String[] parts = l.split(" ");
+            switch (parts[0]) {
+                case "ballot":
+                    lastBallotNum = Math.max(lastBallotNum, Ballot.parse(parts[1]).ballotNum);
+                    break;
+                case "slot":
+                    String key = (parts.length >= 5) ? parts[5] : null;
+                    lastSlotOut = Math.max(lastSlotOut, Integer.parseInt(parts[1]));
+                    if (temporaryStorage.containsKey(key)
+                            || removedKeys.contains(key))
+                        continue here;
+                    switch (parts[3]) {
+                        case "set":
+                            temporaryStorage.put(key, parts[6]);
+                            //Joiner.on(" ").join(Arrays.copyOfRange(parts, 5, parts.length - 1)));
+                            break;
+                        case "delete":
+                            removedKeys.add(key);
+                            break;
+                    }
+                    break;
+            }
+        }
 
-    public void saveToDisk(Object data) {
-        synchronized (writer) {
-            try {
-                writer.append(data.toString());
-                writer.append('\n');
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
+        keyValueStorage = temporaryStorage;
+
+        for (String l : lines) {
+            String[] parts = l.split(" ");
+            if ("ballot".equals(parts[0])) {
+                lastBallotNum = Ballot.parse(parts[1]).ballotNum;
+                break;
             }
         }
     }
 
+    public void saveToDisk(String s) {
+        try {
+            writer.write(s);
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("unable to write to file");
+            System.exit(1);
+        }
+    }
 
-    public HashMap<String, String> restoreFromDisc() {
-        return null;
+    public int nextBallotNum() {
+        return ++lastBallotNum;
     }
 }
