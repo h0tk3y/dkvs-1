@@ -1,0 +1,17 @@
+apply plugin: 'java'
+targetCompatibility = 1.8
+sourceCompatibility = 1.8
+
+apply plugin: 'application'
+mainClassName = 'ru.ifmo.ctddev.year2012.nets.lab4.Node'
+
+applicationDistribution.from(file("../dkvs.properties")) { into "bin" }
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile fileTree(dir: 'lib', include: '*.jar')
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
